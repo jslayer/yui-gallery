@@ -1,0 +1,7 @@
+{
+    "gallery-adjet": {
+        "requires": [
+            "base-build", "widget"
+        ]
+    }
+}

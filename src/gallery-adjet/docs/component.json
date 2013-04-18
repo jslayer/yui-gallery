@@ -1,0 +1,10 @@
+{
+    "name"       : "gallery-adjet",
+    "displayName": "Gallery: gallery-adjet",
+    "description": "Application Widget",
+    "author"     : [ "jslayer" ],
+
+    "tags": [ "gallery" ],
+
+    "examples": []
+}

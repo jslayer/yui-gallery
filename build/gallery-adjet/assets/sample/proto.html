@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en-US">
+<head>
+  <meta charset="UTF-8">
+  <title></title>
+  <script src="http://yui.yahooapis.com/3.9.1/build/yui/yui-min.js"></script>
+  <script src="../../gallery-adjet.js"></script>
+
+  <script>
+    YUI().use('gallery-adjet', function(Y){
+      var F = Y.Base.create('first', Y.Adget, [ ], {
+        bindUI : function() {
+          Y.later(1000, this, function() {
+            this.set('time', Date.now());
+          }, null, true);
+
+          Y.later(2000, this, function() {
+            this.set('smAttr', '<i>Dolor sit amet</i>');
+          });
+
+          Y.later(3000, this, function(){
+            this.set('logo', 'http://yuilibrary.com/img/community/preview-gallery.jpg');
+          });
+        }
+      }, {
+        ATTRS : {
+          time : {
+            value : Date.now()
+          },
+          smAttr : {
+            value : '<b>Lorem ipsum</b>'
+          }
+        },
+        SECTIONS : {
+          body : {
+            elements : {
+              text : {
+                value : 'Text'
+              },
+              clock : {
+                attribute : 'time',
+                formatter : function(value) {
+                  return (new Date).getSeconds() + ' : ' + value;
+                }
+              },
+              htmlExample : {
+                listen    : true,
+                attribute : 'smAttr',
+                cssName   : 'custom-html',
+                allowHTML : true
+              }
+            }
+          }
+        }
+      });
+
+      var T = Y.Base.create('three', F, [ ], {
+
+      }, {
+        SECTIONS : {
+          header : {
+            cssName  : 'custom-section-name',
+            elements : {
+              logo : {
+                cssName    : 'logo',
+                template   : '<img>',
+                targetAttr : 'src'
+              },
+              clockWithTarget : {
+                attribute      : 'time',
+                template       : '<div>[<span>---</span>]</div>',
+                targetSelector : '>span'
+              }
+            }
+          }
+        },
+        ATTRS : {
+          sections : {
+            value : ['header', 'body']
+          },
+          logo : {
+            value : 'http://yuilibrary.com/img/community/preview-theater.jpg'
+          }
+        }
+      });
+
+      var t = new T();
+
+      window.t = t;
+
+      t.render(
+              Y.one('body')
+      );
+    });
+  </script>
+</head>
+<body>
+
+</body>
+</html>

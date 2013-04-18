@@ -1,0 +1,10 @@
+{
+    "name": "gallery-adjet",
+    "builds": {
+        "gallery-adjet": {
+            "jsfiles": [
+                "js/gallery-adjet.js"
+            ]
+        }
+    }
+}
