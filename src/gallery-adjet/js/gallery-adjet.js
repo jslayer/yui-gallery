@@ -6,20 +6,26 @@
 var Adjet,
   doc = Y.config.doc,
   CB = 'contentBox',
+  CHANGE = 'Change',
   _getClassName = function() {
     return Array.prototype.slice.call(arguments).join('-');
   },
   EVT_EC = 'sectionElementChange',
   ELEMENT_TEMPLATE = '<div></div>';
 
+function toUnderscore(value){
+  return value.replace(/([A-Z])/g, function($1){return "_"+$1.toLowerCase();});
+}
+
 Adjet = Y.Base.create('adjet', Y.Widget, [ ], {
+  //todo - use cssName of section in generated element cssName
   //todo - implement getElement(sectionName,name)
   //todo - implement getSectionNode(sectionName)
   //todo - show how elements could be changed in inherited classes
   //todo - try to find the way of using nodes for section & elements from existing dom
   //todo - add element `drag` inside & outside the sections; i.e: moveElement(name, srcSection, targetSection, after)
   //todo - implement runtime addElement(section, name, elementData)
-  //todo - implement listen sectionsChange : destroy old sections & elements, create new sections & elements
+  //todo *** implement listen sectionsChange : destroy old sections & elements, create new sections & elements
   //todo - add global support of form elements
   //todo - implement complex attributes support
   //todo - implement attributes of Y.Model || Y.LazyModel support
@@ -32,6 +38,8 @@ Adjet = Y.Base.create('adjet', Y.Widget, [ ], {
     Y.before(this._renderSections, this, 'renderUI');
 
     Y.before(this._bindSections, this, 'bindUI');
+
+    //this.on('sectionsChange', this._defSectionsChangeFn, this);
 
     this.publish(EVT_EC, {
       emitFacade : true
@@ -69,15 +77,18 @@ Adjet = Y.Base.create('adjet', Y.Widget, [ ], {
   },
   _renderSection : function(sName, target) {
     var section = this._sections[sName],
-      sectionNode;
+      sectionNode,
+      sectionCssName;
 
     if (section) {
       //we will create a node here
       sectionNode = section._node = Y.Node.create('<div></div>', doc);
 
       //do not add any css classes if cssName === false
+      sectionCssName = section.cssName || _getClassName('section', toUnderscore(sName));
+
       if (section.cssName !== false) {
-        sectionNode.addClass(section.cssName || _getClassName('section', sName));
+        sectionNode.addClass(sectionCssName);
       }
 
       //render elements
@@ -90,11 +101,11 @@ Adjet = Y.Base.create('adjet', Y.Widget, [ ], {
 
         value = element.value ? element.value : this.get(element.attribute || eName);
 
-        value = this._elementFormatter(element, value);
-
         template = element.template || ELEMENT_TEMPLATE;
 
         node = element._node = Y.Node.create(template, doc);
+
+        value = this._elementFormatter(element, value);
 
         this.fire(EVT_EC, {
           element : element,
@@ -103,7 +114,7 @@ Adjet = Y.Base.create('adjet', Y.Widget, [ ], {
 
         //do not add any css classes if cssName === false
         if (element.cssName !== false) {
-          node.addClass(element.cssName || _getClassName('section', sName, eName));
+          node.addClass(element.cssName || _getClassName(sectionCssName, toUnderscore(eName)));
         }
 
         sectionNode.append(node);
@@ -117,7 +128,7 @@ Adjet = Y.Base.create('adjet', Y.Widget, [ ], {
       if (section._node) {
         Y.Object.each(section.elements, function(element, name) {
           if (!element.value && element.listen !== false) {
-            this.after((element.attribute || name) + 'Change', this._elementValueChangedFn, this, element);
+            this.after((element.attribute || name) + CHANGE, this._elementValueChangedFn, this, element);
           }
         }, this);
       }
@@ -141,7 +152,7 @@ Adjet = Y.Base.create('adjet', Y.Widget, [ ], {
       value = e.value,
       node;
 
-    node = element.targetSelector ? element._node.one(element.targetSelector) : element._node;
+    node = element.selector ? element._node.one(element.selector) : element._node;
 
     if (node) {
       if (!element.targetAttr && element.allowHTML) {
@@ -160,6 +171,9 @@ Adjet = Y.Base.create('adjet', Y.Widget, [ ], {
     }
 
     return Y.Lang.isValue(_value) ? _value : value;
+  },
+  _defSectionsChangeFn : function(e) {
+    console.log(e);
   }
 }, {
   ATTRS : {

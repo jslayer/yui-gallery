@@ -8,93 +8,129 @@
 
   <script>
     YUI().use('gallery-adjet', function(Y){
-      var F = Y.Base.create('first', Y.Adget, [ ], {
-        bindUI : function() {
-          Y.later(1000, this, function() {
-            this.set('time', Date.now());
-          }, null, true);
+      var AdjetComplex,
+          acInstance;
 
-          Y.later(2000, this, function() {
-            this.set('smAttr', '<i>Dolor sit amet</i>');
-          });
-
-          Y.later(3000, this, function(){
-            this.set('logo', 'http://yuilibrary.com/img/community/preview-gallery.jpg');
-          });
-        }
-      }, {
+      AdjetComplex = Y.Base.create('first', Y.Adget, [ ], {}, {
         ATTRS : {
-          time : {
-            value : Date.now()
+          timeValue : {
+            value : null
           },
-          smAttr : {
-            value : '<b>Lorem ipsum</b>'
+          htmlAttr : {
+            value : null
+          },
+          imagePathAttr : {
+            value : null
           }
         },
         SECTIONS : {
-          body : {
+          headerSection : {
             elements : {
               text : {
-                value : 'Text'
+                value : 'Just a text'
               },
-              clock : {
-                attribute : 'time',
+              valuePlainCustom : {
+                cssName   : 'customTimeValue',
+                attribute : 'timeValue'
+              },
+              valuePlain : {
+                attribute : 'timeValue'
+              },
+              valueFormatted : {
+                attribute : 'timeValue',
                 formatter : function(value) {
-                  return (new Date).getSeconds() + ' : ' + value;
+                  return ['[', value, ']'].join('');
                 }
               },
-              htmlExample : {
-                listen    : true,
-                attribute : 'smAttr',
-                cssName   : 'custom-html',
-                allowHTML : true
+              valueNested : {
+                attribute : 'timeValue',
+                template  : '<h3>Date.now(): <span></span></h3>',
+                selector  : '>span'
               }
             }
-          }
-        }
-      });
-
-      var T = Y.Base.create('three', F, [ ], {
-
-      }, {
-        SECTIONS : {
-          header : {
-            cssName  : 'custom-section-name',
+          },
+          body : {
+            cssName  : 'content',
             elements : {
-              logo : {
-                cssName    : 'logo',
+              htmlAttrPlain : {
+                attribute : 'htmlAttr'
+              },
+              htmlAttrHtml : {
+                attribute : 'htmlAttr',
+                allowHTML : true
+              },
+              imagePlain : {
+                attribute  : 'imagePathAttr',
                 template   : '<img>',
                 targetAttr : 'src'
               },
-              clockWithTarget : {
-                attribute      : 'time',
-                template       : '<div>[<span>---</span>]</div>',
-                targetSelector : '>span'
+              imageFormatted : {
+                attribute  : 'imagePathAttr',
+                template   : '<img>',
+                targetAttr : 'src',
+                formatter  : function(value, element){
+                  element._node.setAttrs({
+                    alt : 'Text alt attribute value'
+                  });
+                }
               }
             }
-          }
-        },
-        ATTRS : {
-          sections : {
-            value : ['header', 'body']
-          },
-          logo : {
-            value : 'http://yuilibrary.com/img/community/preview-theater.jpg'
           }
         }
       });
 
-      var t = new T();
+      acInstance = new AdjetComplex({
+        timeValue     : Date.now(),
+        htmlAttr      : '<b>Lorem</b>',
+        imagePathAttr : 'http://yuilibrary.com/img/community/preview-gallery.jpg'
+      });
 
-      window.t = t;
+      acInstance.render(Y.one('body'));
 
-      t.render(
-              Y.one('body')
-      );
+      /**
+       * Simple buttons to change 2 values;
+       */
+
+      Y.one('#btn-htmlAttr').on('click', function() {
+        var values = [
+              '<b>Lorem</b>',
+              '<i>Ipsum</i>',
+              '<a href="#">Dolor</a>'
+            ],
+            current = acInstance.get('htmlAttr'),
+            index = values.indexOf(current);
+
+        acInstance.set('htmlAttr', values[index >= values.length - 1 ? 0 : index + 1]);
+      });
+      Y.one('#btn-imagePathAttr').on('click', function() {
+        var values = [
+              'http://yuilibrary.com/img/community/preview-gallery.jpg',
+              'http://yuilibrary.com/img/community/preview-theater.jpg'
+            ],
+            current = acInstance.get('imagePathAttr'),
+            index = values.indexOf(current);
+
+        acInstance.set('imagePathAttr', values[index >= values.length - 1 ? 0 : index + 1]);
+      });
+
+      /**
+       * Update timeValue with 1000ms interval
+       */
+      Y.later(1000, acInstance, function() {
+        this.set('timeValue', Date.now());
+      }, null, true);
+
     });
   </script>
 </head>
 <body>
-
+<fieldset>
+  <div>
+    <button id="btn-htmlAttr">Change `htmlAttr`</button>
+  </div>
+  <div>
+    <button id="btn-imagePathAttr">Change `imagePathAttr`</button>
+  </div>
+</fieldset>
 </body>
 </html>
