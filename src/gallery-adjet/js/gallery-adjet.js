@@ -18,7 +18,7 @@ function toUnderscore(value){
 }
 
 Adjet = Y.Base.create('adjet', Y.Widget, [ ], {
-  //todo - use cssName of section in generated element cssName
+  //todo - add elements attribute (to provide the list of elements & its order in section)
   //todo - implement getElement(sectionName,name)
   //todo - implement getSectionNode(sectionName)
   //todo - show how elements could be changed in inherited classes
