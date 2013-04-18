@@ -75,7 +75,10 @@ Adjet = Y.Base.create('adjet', Y.Widget, [ ], {
       //we will create a node here
       sectionNode = section._node = Y.Node.create('<div></div>', doc);
 
-      sectionNode.addClass(section.cssName || _getClassName('section', sName));
+      //do not add any css classes if cssName === false
+      if (section.cssName !== false) {
+        sectionNode.addClass(section.cssName || _getClassName('section', sName));
+      }
 
       //render elements
       Y.Object.each(section.elements, function(element, eName) {
@@ -98,7 +101,10 @@ Adjet = Y.Base.create('adjet', Y.Widget, [ ], {
           value   : value
         });
 
-        node.addClass(element.cssName || _getClassName('section', sName, eName));
+        //do not add any css classes if cssName === false
+        if (element.cssName !== false) {
+          node.addClass(element.cssName || _getClassName('section', sName, eName));
+        }
 
         sectionNode.append(node);
       }, this);
