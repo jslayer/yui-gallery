@@ -189,4 +189,4 @@ Adjet = Y.Base.create('adjet', Y.Widget, [ ], {
 Y.Adget = Adjet;
 
 
-}, '@VERSION@', {"requires": ["base-build", "widget"]});
+}, '1.0.0-dev', {"requires": ["base-build", "widget"]});
