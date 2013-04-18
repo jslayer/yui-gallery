@@ -9,9 +9,11 @@
   <script>
     YUI().use('gallery-adjet', function(Y){
       var AdjetComplex,
-          acInstance;
+          AdjetMutable,
+          acInstance,
+          amInstance;
 
-      AdjetComplex = Y.Base.create('first', Y.Adget, [ ], {}, {
+      AdjetComplex = Y.Base.create('adjet-complex', Y.Adget, [ ], {}, {
         ATTRS : {
           timeValue : {
             value : null
@@ -88,33 +90,33 @@
         imagePathAttr : 'http://yuilibrary.com/img/community/preview-gallery.jpg'
       });
 
-      acInstance.render(Y.one('body'));
+      acInstance.render(Y.one('.example1'));
 
       /**
        * Simple buttons to change 2 values;
        */
-
       Y.one('#btn-htmlAttr').on('click', function() {
         var values = [
               '<b>Lorem</b>',
               '<i>Ipsum</i>',
               '<a href="#">Dolor</a>'
             ],
-            current = acInstance.get('htmlAttr'),
+            current = this.get('htmlAttr'),
             index = values.indexOf(current);
 
-        acInstance.set('htmlAttr', values[index >= values.length - 1 ? 0 : index + 1]);
-      });
+        this.set('htmlAttr', values[index >= values.length - 1 ? 0 : index + 1]);
+      }, acInstance);
+
       Y.one('#btn-imagePathAttr').on('click', function() {
         var values = [
               'http://yuilibrary.com/img/community/preview-gallery.jpg',
               'http://yuilibrary.com/img/community/preview-theater.jpg'
             ],
-            current = acInstance.get('imagePathAttr'),
+            current = this.get('imagePathAttr'),
             index = values.indexOf(current);
 
-        acInstance.set('imagePathAttr', values[index >= values.length - 1 ? 0 : index + 1]);
-      });
+        this.set('imagePathAttr', values[index >= values.length - 1 ? 0 : index + 1]);
+      }, acInstance);
 
       /**
        * Update timeValue with 1000ms interval
@@ -123,17 +125,126 @@
         this.set('timeValue', Date.now());
       }, null, true);
 
+      AdjetMutable = Y.Base.create('adjet-mutable', Y.Adget, [ ], {
+        CSS_SECTION_PREFIX : false
+      }, {
+        ATTRS : {
+          title : {
+            value : 'Hello world'
+          },
+          body : {
+            value : 'Lorem ipsum dolor'
+          },
+          footer : {
+            value : 'Just a sample text'
+          },
+          sections : {
+            value : ['content']
+          }
+        },
+        SECTIONS : {
+          header : {
+            elements : {
+              title : {
+                template  : '<h1></h1>'
+              }
+            }
+          },
+          content   : {
+            elements : {
+              body : {
+                template  : '<p><em></em></p>',
+                selector  : '>em'
+              }
+            }
+          },
+          footer : {
+            elements : {
+              footer : {
+                template  : '<p></p>'
+              }
+            }
+          }
+        }
+      });
+
+      amInstance = new AdjetMutable();
+
+      amInstance.render(Y.one('.example2'));
+
+      Y.one('#btn-mutableHeader').on('click', function() {
+        var sections = this.get('sections'),
+            sectionName = 'header',
+            index = sections.indexOf(sectionName);
+
+        if (index === -1) {
+          sections.unshift(sectionName);
+        }
+        else {
+          sections.splice(index, 1);
+        }
+
+        console.log(sections);
+
+        this.set('sections', sections);
+      }, amInstance);
+
+      Y.one('#btn-mutableBody').on('click', function() {
+        var sections = this.get('sections'),
+            sectionName = 'content',
+            index = sections.indexOf(sectionName);
+
+        if (index === -1) {
+          sections.splice(sections.indexOf('header') === -1 ? 0 : 1, 0, sectionName);
+        }
+        else {
+          sections.splice(index, 1);
+        }
+
+        this.set('sections', sections);
+      }, amInstance);
+
+      Y.one('#btn-mutableFooter').on('click', function() {
+        var sections = this.get('sections'),
+            sectionName = 'footer',
+            index = sections.indexOf(sectionName);
+
+        if (index === -1) {
+          sections.push(sectionName);
+        }
+        else {
+          sections.splice(index, 1);
+        }
+
+        console.log(sections);
+
+        this.set('sections', sections);
+      }, amInstance);
     });
   </script>
 </head>
 <body>
 <fieldset>
+  <div class="example1"><!-- render adjet complex here --></div>
   <div>
     <button id="btn-htmlAttr">Change `htmlAttr`</button>
   </div>
   <div>
     <button id="btn-imagePathAttr">Change `imagePathAttr`</button>
   </div>
+</fieldset>
+<hr>
+<fieldset>
+  <div>
+    <button id="btn-mutableHeader">Toggle header section</button>
+  </div>
+  <div>
+    <button id="btn-mutableBody">Toggle body section</button>
+  </div>
+  <div>
+    <button id="btn-mutableFooter">Toggle footer section</button>
+  </div>
+  <div class="example2"><!-- render adjet mutable here --></div>
 </fieldset>
 </body>
 </html>

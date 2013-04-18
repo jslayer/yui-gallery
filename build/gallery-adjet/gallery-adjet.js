@@ -13,13 +13,15 @@ var Adjet,
     return Array.prototype.slice.call(arguments).join('-');
   },
   EVT_EC = 'sectionElementChange',
-  ELEMENT_TEMPLATE = '<div></div>';
+  ELEMENT_TEMPLATE = '<div></div>',
+  L = Y.Lang;
 
 function toUnderscore(value){
   return value.replace(/([A-Z])/g, function($1){return "_"+$1.toLowerCase();});
 }
 
 Adjet = Y.Base.create('adjet', Y.Widget, [ ], {
+  //todo - provide the way of setting up the section cssName prefix (per instance ?)
   //todo - add elements attribute (to provide the list of elements & its order in section)
   //todo - implement getElement(sectionName,name)
   //todo - implement getSectionNode(sectionName)
@@ -34,6 +36,7 @@ Adjet = Y.Base.create('adjet', Y.Widget, [ ], {
   //todo - add some events fired when element's value changed ? bidirectional element <=> attr
   //todo - add destructors
   //todo - implement nested renderUI/bindUI/syncUI support (it looks like Y.Widgets do not allow this by default)
+  CSS_SECTION_PREFIX : 'section',
   initializer : function() {
     this._sections = this._getStaticSections();
 
@@ -41,7 +44,7 @@ Adjet = Y.Base.create('adjet', Y.Widget, [ ], {
 
     Y.before(this._bindSections, this, 'bindUI');
 
-    //this.on('sectionsChange', this._defSectionsChangeFn, this);
+    this.on('sectionsChange', this._defSectionsChangeFn, this);
 
     this.publish(EVT_EC, {
       emitFacade : true
@@ -77,7 +80,14 @@ Adjet = Y.Base.create('adjet', Y.Widget, [ ], {
       }, this);
     }
   },
-  _renderSection : function(sName, target) {
+  /**
+   *
+   * @param sName
+   * @param target
+   * @param {String?} where
+   * @private
+   */
+  _renderSection : function(sName, target, where) {
     var section = this._sections[sName],
       sectionNode,
       sectionCssName;
@@ -87,7 +97,11 @@ Adjet = Y.Base.create('adjet', Y.Widget, [ ], {
       sectionNode = section._node = Y.Node.create('<div></div>', doc);
 
       //do not add any css classes if cssName === false
-      sectionCssName = section.cssName || _getClassName('section', toUnderscore(sName));
+      //todo - refactor it
+      sectionCssName = section.cssName || _getClassName.apply(
+        null,
+        this.CSS_SECTION_PREFIX ? [this.CSS_SECTION_PREFIX, toUnderscore(sName)] : [toUnderscore(sName)]
+      );
 
       if (section.cssName !== false) {
         sectionNode.addClass(sectionCssName);
@@ -122,19 +136,28 @@ Adjet = Y.Base.create('adjet', Y.Widget, [ ], {
         sectionNode.append(node);
       }, this);
 
-      target.append(sectionNode);
+      //noinspection FallthroughInSwitchStatementJS
+      switch(where) {
+        case 'before':
+        case 'after':
+          target.insert(sectionNode, where);
+          break;
+        default:
+          target.append(sectionNode);
+      }
     }
   },
   _bindSections : function() {
-    Y.Object.each(this._sections, function(section) {
-      if (section._node) {
-        Y.Object.each(section.elements, function(element, name) {
-          if (!element.value && element.listen !== false) {
-            this.after((element.attribute || name) + CHANGE, this._elementValueChangedFn, this, element);
-          }
-        }, this);
-      }
-    }, this);
+    Y.Object.each(this._sections, this._bindSection, this);
+  },
+  _bindSection : function(section) {
+    if (section._node) {
+      Y.Object.each(section.elements, function(element, name) {
+        if (!element.value && element.listen !== false) {
+          this.after((element.attribute || name) + CHANGE, this._elementValueChangedFn, this, element);
+        }
+      }, this);
+    }
   },
   _elementValueChangedFn : function(e, element) {
     var value = e.newVal;
@@ -168,14 +191,77 @@ Adjet = Y.Base.create('adjet', Y.Widget, [ ], {
   _elementFormatter : function(element, value) {
     var _value;
 
-    if (Y.Lang.isFunction(element.formatter)) {
+    if (L.isFunction(element.formatter)) {
       _value = element.formatter.call(this, value, element);
     }
 
-    return Y.Lang.isValue(_value) ? _value : value;
+    return L.isValue(_value) ? _value : value;
   },
   _defSectionsChangeFn : function(e) {
-    console.log(e);
+    var current = e.newVal || [ ],
+      cb = this.get(CB);
+
+    //go thought the sections; destroy those that are not it the list; and initiate newly added
+    Y.Object.each(this._sections, function(section, sectionName) {
+      var target, where, sectionIndex, iLeft, iRight/*, dLeft, dRight*/;
+
+      if (section._node && current.indexOf(sectionName) === -1) {
+        /**
+         * Destroy the section:
+         * - destroy the nodes
+         * - detach listeners
+         */
+        section._node.remove(true);
+        //todo - detach listeners
+        delete section._node;
+      }
+      else if (current.length && !section._node && current.indexOf(sectionName) > -1) {
+
+        target = cb;
+
+        /**
+         * Create the section
+         * We should find out where to pass the section
+         */
+        if (current.length === 1) {
+          target = cb;
+        }
+        else {
+          sectionIndex = current.indexOf(sectionName);
+
+          //find the nearest rendered sibling section
+          Y.Array.each(current, function(name, index) {
+            if (sectionName !== name && this._sections[name]._node) {
+              if (index > sectionIndex) {
+                iRight = L.isValue(iRight) ? Math.min(iRight, index) : index;
+              }
+              else {
+                iLeft = L.isValue(iLeft) ? Math.max(iLeft, index) : index;
+              }
+            }
+          }, this);
+
+          /*if (L.isValue(iLeft)) {
+            dLeft = Math.abs(sectionIndex - iLeft);
+          }
+
+          if (L.isValue(iRight)) {
+            dRight = Math.abs(sectionIndex - iRight);
+          }
+
+          if (dLeft > dRight) {
+
+          }*/
+        }
+
+        this._renderSection(sectionName, target, where);
+
+        /**
+         * Bind the section
+         */
+        this._bindSection(section);
+      }
+    }, this);
   }
 }, {
   ATTRS : {
