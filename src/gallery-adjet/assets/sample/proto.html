@@ -21,34 +21,12 @@
           },
           imagePathAttr : {
             value : null
+          },
+          sections : {
+            value : ['headerSection', 'body']
           }
         },
         SECTIONS : {
-          headerSection : {
-            elements : {
-              text : {
-                value : 'Just a text'
-              },
-              valuePlainCustom : {
-                cssName   : 'customTimeValue',
-                attribute : 'timeValue'
-              },
-              valuePlain : {
-                attribute : 'timeValue'
-              },
-              valueFormatted : {
-                attribute : 'timeValue',
-                formatter : function(value) {
-                  return ['[', value, ']'].join('');
-                }
-              },
-              valueNested : {
-                attribute : 'timeValue',
-                template  : '<h3>Date.now(): <span></span></h3>',
-                selector  : '>span'
-              }
-            }
-          },
           body : {
             cssName  : 'content',
             elements : {
@@ -73,6 +51,31 @@
                     alt : 'Text alt attribute value'
                   });
                 }
+              }
+            }
+          },
+          headerSection : {
+            elements : {
+              text : {
+                value : 'Just a text'
+              },
+              valuePlainCustom : {
+                cssName   : 'customTimeValue',
+                attribute : 'timeValue'
+              },
+              valuePlain : {
+                attribute : 'timeValue'
+              },
+              valueFormatted : {
+                attribute : 'timeValue',
+                formatter : function(value) {
+                  return ['[', value, ']'].join('');
+                }
+              },
+              valueNested : {
+                attribute : 'timeValue',
+                template  : '<h3>Date.now(): <span></span></h3>',
+                selector  : '>span'
               }
             }
           }
