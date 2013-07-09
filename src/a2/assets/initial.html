@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en-US">
+<head>
+    <meta charset="UTF-8">
+    <title>A2 : initial</title>
+    <style type="text/css">
+        .hidden {
+            visibility : hidden;
+        }
+    </style>
+</head>
+<body>
+<div class="yui3-a2 yui3-a2initial hidden">
+    <div class="yui3-a2-content">
+        <h1>{{ title | default: 'This is default title' }}</h1>
+        <div class="form-item" data-scope="form">
+            {{ strings.textValueLabel }}
+            <input type="text" data-model="&.textValue" />
+        </div>
+
+        <div class="form-item" data-scope="strings">
+            {{ &.textValueLabel }}
+            <input type="text" data-model="form.textValue" />
+        </div>
+
+        <div class="form-item">
+            {{ strings.textValueLabel }}
+            <input type="text" data-model="form.textValue" data-process="this.disabled = form.disabled" />
+        </div>
+
+        <div class="form-item" data-scope="form">
+            {{ strings.textValueLabel }}
+            <input type="text" data-model="form.textValue" data-process="this.disabled = &.disabled" />
+        </div>
+    </div>
+</div>
+<script src="http://yui.yahooapis.com/3.10.3/build/yui/yui-min.js"></script>
+<script src="../js/a2-module.js"></script>
+<script>
+    YUI().use('a2', function(Y) {
+        //console.log(Y.A2);
+
+        var a2i = new Y.A2({
+            srcNode : '.yui3-a2initial',
+            strings : {
+                textValueLabel : 'Text label'
+            },
+            form    : {
+                textValue : 'Default text field value'
+            },
+            disable : false
+        });
+
+        console.log(a2i);
+    });
+</script>
+</body>
+</html>

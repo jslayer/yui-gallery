@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en-US">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<div class="yui3-a2 yui3-a2simple">
+    <div class="yui3-a2-content">
+        <div class="section-header" data-scope="node">
+            <h2>{{ &.title }}</h2>
+            <h3>{{ &.subtitle }}</h3>
+        </div>
+        <div class="section-body" data-scope="node">
+            <p>{{ &.content }}</p>
+            <p>{{ &.description }}</p>
+        </div>
+        <hr>
+        <small>
+            {{ node.title }} | {{ node.subtitle }} | {{ node.content | length }}
+        </small>
+        <hr>
+        <div class="section-form" data-scope="form">
+            <div class="form-item">
+                <label>
+                    {{ strings.form.fooLabel | default: "Text value" }}
+                    <input type="text" data-model="&.foo" />
+                </label>
+            </div>
+            <div class="form-item">
+                <label>
+                    {{ strings.form.barLabel | default: "Drop Down value" }}
+                    <select data-model="&.bar" data-repeat="item in this">
+                        <option value="{&.value}">{{ &.text }}</option>
+                    </select>
+                </label>
+            </div>
+            <div class="form-item">
+                <label>
+                    {{ strings.form.loremLabel }}
+                    {{ repeat item in &.lorem }}
+                    <input type="checkbox" name="checked" data-process="{{ this.value = &.value, this.checked = !!&.checked }}"/> {{ &.label }}
+                    {{ repeat; }}
+                </label>
+                <label>
+                    {{ strings.form.ipsumLabel }}
+                    {{ repeat item in &.ipsum }}
+                        <input type="radio" name="radio" data-process="{{ this.value = &.value, this.checked = !!&.checked }}" /> {{ &.label }}
+                    {{ repeat; }}
+                </label>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
