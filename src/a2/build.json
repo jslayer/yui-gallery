@@ -1,0 +1,10 @@
+{
+    "name": "a2",
+    "builds": {
+        "a2": {
+            "jsfiles": [
+                "js/a2.js"
+            ]
+        }
+    }
+}

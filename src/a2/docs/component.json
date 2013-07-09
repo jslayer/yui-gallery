@@ -1,0 +1,11 @@
+{
+    "name"       : "a2",
+    "displayName": "Gallery: a2",
+    "description": "*Summary Goes Here*",
+    "author"     : [ "" ],
+    "use"        : [ "a2" ],
+
+    "tags": [ "gallery" ],
+
+    "examples": []
+}

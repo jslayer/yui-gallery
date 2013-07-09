@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en-US">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<div class="yui3-a2 yui3-a2simple">
+    <div class="yui3-a2-content">
+        <div class="section-header">
+            <h2>{{ node.title }}</h2>
+            <h3>{{ node.subtitle }}</h3>
+        </div>
+        <div class="section-body">
+            <p>{{ node.content }}</p>
+            <p>{{ node.description }}</p>
+        </div>
+        <div class="section-form">
+            <div class="form-item">
+                <label>
+                    {{ strings.labels.text | default: "Text value" }}
+                    <input type="text" name="textValue" />
+                </label>
+            </div>
+            <div class="form-item">
+                <label>
+                    {{ strings.labels.dropDown | default: "Drop Down value" }}
+                    <select name="dropDownValue">
+                        <option value="0">{{ strings.options.dropDown.0 | default : "--" }}</option>
+                        <option value="1">{{ strings.options.dropDown.1 }}</option>
+                        <option value="2">{{ strings.options.dropDown.2 }}</option>
+                    </select>
+                </label>
+            </div>
+            <div class="form-item">
+                <label>
+                    {{ strings.labels.checkBox | default: "Check boxes" }}
+                    <input type="checkbox" name="checked" value="0" checked/> {{ strings.checked.0 | default:"0" }}
+                    <input type="checkbox" name="checked" value="1" checked/> {{ strings.checked.1 | default:"1" }}
+                </label>
+                <label>
+                    {{ strings.labels.radio | default: "Radio boxes" }}
+                    <input type="radio" name="radio" value="no" /> {{ strings.radio.no | default:"No" }}
+                    <input type="radio" name="radio" value="yes" /> {{ strings.radio.yes | default:"Yes" }}
+                </label>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,8 @@
+{
+    "a2": {
+        "requires": [
+            "widget"
+        ],
+        "skinnable": true
+    }
+}
