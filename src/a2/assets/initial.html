@@ -13,6 +13,7 @@
 <div class="yui3-a2 yui3-a2initial hidden">
     <div class="yui3-a2-content">
         <h1>{{ title | default: 'This is default title' }}</h1>
+
         <div class="form-item" data-scope="form">
             {{ strings.textValueLabel }}
             <input type="text" data-model="&.textValue" />
@@ -34,24 +35,48 @@
         </div>
     </div>
 </div>
+
+<!--<div class="yui3-a2simple">
+    {{ title }}
+
+    {{ for item in list }}
+    {{ for; }}
+</div>-->
+
+<div class="yui3-a2simple">
+    {{ title }}
+    <ul data-repeat="item in items">
+        <li>{{ &.label }}</li>
+    </ul>
+    <!--footer-->
+</div>
+
 <script src="http://yui.yahooapis.com/3.10.3/build/yui/yui-min.js"></script>
 <script src="../js/a2-module.js"></script>
 <script>
-    YUI().use('a2', function(Y) {
+    YUI().use('a2', function(Y){
         //console.log(Y.A2);
 
+        /*var a2i = new Y.A2({
+         srcNode : '.yui3-a2initial',
+         strings : {
+         textValueLabel : 'Text label'
+         },
+         form    : {
+         textValue : 'Default text field value'
+         },
+         disable : false
+         });
+
+         console.log(a2i);*/
+
+        console.time('all');
+
         var a2i = new Y.A2({
-            srcNode : '.yui3-a2initial',
-            strings : {
-                textValueLabel : 'Text label'
-            },
-            form    : {
-                textValue : 'Default text field value'
-            },
-            disable : false
+            srcNode : '.yui3-a2simple'
         });
 
-        console.log(a2i);
+        console.timeEnd('all');
     });
 </script>
 </body>
