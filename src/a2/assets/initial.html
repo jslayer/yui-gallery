@@ -43,37 +43,36 @@
     {{ for; }}
 </div>-->
 
-<div class="yui3-a2simple">
+<!--<div class="yui3-a2simple">
     {{ title }}
     <ul data-repeat="item in items">
         <li>{{ &.label }}</li>
     </ul>
-    <!--footer-->
+    &lt;!&ndash;footer&ndash;&gt;
+</div>-->
+
+<div class="yui3-a2simple">
+    {{ value1 }} : static : {{ value2 }}
+    <hr>
+    <input type="text" data-model="value1" />
+    <input type="text" data-model="value2" />
 </div>
 
 <script src="http://yui.yahooapis.com/3.10.3/build/yui/yui-min.js"></script>
 <script src="../js/a2-module.js"></script>
 <script>
     YUI().use('a2', function(Y){
-        //console.log(Y.A2);
-
-        /*var a2i = new Y.A2({
-         srcNode : '.yui3-a2initial',
-         strings : {
-         textValueLabel : 'Text label'
-         },
-         form    : {
-         textValue : 'Default text field value'
-         },
-         disable : false
-         });
-
-         console.log(a2i);*/
-
-        console.time('all');
 
         var a2i = new Y.A2({
             srcNode : '.yui3-a2simple'
+        });
+
+        Y.one('[data-model=value1]').on('keyup', function(e) {
+            a2i.set('value1', e.currentTarget.get('value'));
+        });
+
+        Y.one('[data-model=value2]').on('keyup', function(e) {
+            a2i.set('value2', e.currentTarget.get('value'));
         });
 
         console.timeEnd('all');
