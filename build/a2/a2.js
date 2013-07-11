@@ -1,3 +1,5 @@
+YUI.add('a2', function (Y, NAME) {
+
 var A = Y.Array;
 
 var O = Y.Object;
@@ -484,3 +486,6 @@ Y.extend(PluginNodeClick, Y.Plugin.Base, {
 });
 
 Y.A2 = A2;
+
+
+}, '@VERSION@', {"requires": ["widget"], "skinnable": true});

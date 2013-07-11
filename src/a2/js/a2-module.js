@@ -487,4 +487,4 @@ YUI.add('a2', function (Y, NAME) {
 
     Y.A2 = A2;
 
-}, '1.0.0-dev', {"requires": ["base", 'node', 'plugin']});
+}, '1.0.0', {"requires": ["base", 'node', 'plugin']});
