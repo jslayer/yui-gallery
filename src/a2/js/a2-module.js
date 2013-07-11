@@ -6,6 +6,21 @@ YUI.add('a2', function (Y, NAME) {
         EMPTY_RE = /^\s*$/,
         A2;
 
+    //todo - add expression support ?
+    //todo - add filters/modificators support
+    //todo - add nested (x.y.z) values rendering
+    //todo - add nested (x.y.z) model support of NodeModel
+    //todo - !!!all the main features should be provided inside the core
+    //todo - add string translation support (based on Y.Intl)
+    //todo - data-model should create a local scope for children
+    //todo - NodeAttribute should use prefixes
+    //todo - add even/odd classes to repeat
+    //todo - NodeModel - x.y should mean - y prop of x object (native/model/lazyModel)
+    //todo - add readOnly support
+    //todo - add selected property for <select>
+    //todo - add switch..on="modelName" support (when, default)
+    //todo - add radio support
+
     A2 = function A2() {
         A2.superclass.constructor.apply(this, arguments);
     };
@@ -262,6 +277,7 @@ YUI.add('a2', function (Y, NAME) {
                         }
 
                         break;
+                    //todo - add support of other form elements: textarea, select etc
                 }
             }
         }
