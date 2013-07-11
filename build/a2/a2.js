@@ -1,23 +1,19 @@
 YUI.add('a2', function (Y, NAME) {
 
-var A = Y.Array;
+var A = Y.Array,
+    O = Y.Object,
+    L = Y.Lang,
+    EMPTY = '',
+    EMPTY_RE = /^\s*$/,
+    A2;
 
-var O = Y.Object;
-
-var L = Y.Lang;
-
-var EMPTY = '';
-
-var A2 = function A2() {
+A2 = function A2() {
     A2.superclass.constructor.apply(this, arguments);
 };
-
-var EMPTY_RE = /^\s*$/;
 
 A2.NAME = 'A2';
 
 Y.extend(A2, Y.Base, {
-    //_allowAdHocAttrs : true,
     initializer : function() {
         this.publish('pre', {
             emitFacade: true
@@ -27,6 +23,8 @@ Y.extend(A2, Y.Base, {
             emitFacade: true
         });
 
+        //todo - move plugins loading into separate method
+        //todo - make good skeleton for plugins
         this.plug(PluginNodeClick);
         this.plug(PluginTextModel);
         this.plug(PluginNodeModel);
@@ -38,13 +36,17 @@ Y.extend(A2, Y.Base, {
 
         this.onceAfter('initializedChange', function() {
             console.time('tree');
+            //todo - join processTre & parse method ?
             this.processTree(
                 this.parse(src)
             );
             console.timeEnd('tree');
         });
 
+        //todo - move the process into separate (render) method ?
+
         src.style.visibility = 'visible';
+        //todo - use some good way of visibility change
     },
     parse : function(node, parent) {
         var tree = {};
@@ -71,7 +73,7 @@ Y.extend(A2, Y.Base, {
                         go = true;
                         break;
                     case 3://TEXT_NODE
-                        if (!EMPTY_RE.test(child.textContent)) {
+                        if (!EMPTY_RE.test(child.textContent)) {//todo - probably should use `new RegExp` here
                             go = true;
                         }
                         break;
@@ -478,14 +480,9 @@ Y.extend(PluginNodeClick, Y.Plugin.Base, {
         }
     }
 }, {
-    NS: 'PluginNodeClick',
-    LIST : [
-        'href',
-        'class'
-    ]
+    NS: 'PluginNodeClick'
 });
 
 Y.A2 = A2;
-
 
 }, '@VERSION@', {"requires": ["widget"], "skinnable": true});
