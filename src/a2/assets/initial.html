@@ -63,15 +63,32 @@
     <input type="text" data-model="value1" />
 </div>-->
 
+<style>
+    .theme-a {
+        color: red;
+        font-weight : bold;
+        font-size : 1.5em;
+    }
+
+    .theme-the {
+        color: green;
+        font-weight : bold;
+        font-size : 1.75em;
+    }
+</style>
+
 <div class="yui3-a2simple">
     <h1>{{ value1 }}</h1>
 
     <input type="text" data-model="value1" />
 
-    <ul data-repeat="item in items">
-        <li><a href="#{{ &.item }}">{{ &.item }}</a></li>
+    <ul data-repeat="index:item in items">
+        <li><a href="#{{ &.item }}" class="theme-{{ &.item }}">{{ &.index }} : {{ &.item }}</a></li>
     </ul>
 
+    <ul data-repeat="item in items">
+        <li><a href="#{{ &.item }}" class="theme-{{ &.item }}">{{ &.item }}</a></li>
+    </ul>
 
     <hr>
 
@@ -90,6 +107,7 @@
     <div data-hide="showMore">
         <h2>hidden on checked</h2>
         <p>This is teaser</p>
+        <button data-click="clickHandler">Show values</button>
     </div>
 </div>
 
@@ -105,6 +123,14 @@
             },
             updateItems : function() {
                 this.set('items', Y.Lang.trim(this.get('value1')).split(' '));
+            },
+            clickHandler : function(e) {
+                var data = [
+                    'value1 :   ' + this.get('value1'),
+                    'items :    ' + this.get('items').toString(),
+                    'showMore : ' + this.get('showMore')
+                ];
+                alert(data.join('\n'));
             }
         }, {
             ATTRS : {
@@ -120,6 +146,16 @@
         var a2i = new A2Custom({
             srcNode : '.yui3-a2simple'
         });
+
+        /*console.log(a2i.get('some.value'));
+
+        a2i.on('someChange', function(e) {//!!!
+          console.log(e);
+        });
+
+        a2i.set('some.value', 22);
+
+        console.log(a2i.get('some.value'));*/
 
         console.timeEnd('all');
     });
