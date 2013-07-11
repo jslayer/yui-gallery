@@ -14,7 +14,7 @@
     </style>
 </head>
 <body>
-<div class="yui3-a2 yui3-a2initial hidden">
+<!--<div class="yui3-a2 yui3-a2initial hidden">
     <div class="yui3-a2-content">
         <h1>{{ title | default: 'This is default title' }}</h1>
 
@@ -38,7 +38,7 @@
             <input type="text" data-model="form.textValue" data-process="this.disabled = &.disabled" />
         </div>
     </div>
-</div>
+</div>-->
 
 <!--<div class="yui3-a2simple">
     {{ title }}
@@ -69,8 +69,28 @@
     <input type="text" data-model="value1" />
 
     <ul data-repeat="item in items">
-        <li>{{ &.item }}</li>
+        <li><a href="#{{ &.item }}">{{ &.item }}</a></li>
     </ul>
+
+
+    <hr>
+
+    <input type="checkbox" data-model="showMore" value="someValue" />
+    <input type="checkbox" data-model="showMore" value="someValue" />
+    <input type="checkbox" data-model="showMore" value="someValue" />
+
+    {{ showMore }}
+
+    <hr>
+    <div data-show="showMore">
+        <h2>visible on checked</h2>
+        <p>This is full text</p>
+        <p>{{ value1 }}</p>
+    </div>
+    <div data-hide="showMore">
+        <h2>hidden on checked</h2>
+        <p>This is teaser</p>
+    </div>
 </div>
 
 <script src="http://yui.yahooapis.com/3.10.3/build/yui/yui-min.js"></script>

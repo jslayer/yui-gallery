@@ -28,6 +28,7 @@ YUI.add('a2', function (Y, NAME) {
             this.plug(PluginTextModel);
             this.plug(PluginNodeModel);
             this.plug(PluginNodeRepeat);
+            this.plug(PluginNodeShow);
 
             var src = this.get('srcNode').getDOMNode();
 
@@ -147,7 +148,7 @@ YUI.add('a2', function (Y, NAME) {
                             node = document.createTextNode(text);
 
                             this.afterHostEvent(name + 'Change', function(e) {
-                                node.nodeValue = e.newVal;
+                                node.nodeValue = e.newVal || '';
                             });
                     }
                 }
@@ -197,19 +198,47 @@ YUI.add('a2', function (Y, NAME) {
 
                 switch(node.nodeName) {
                     case 'INPUT':
-                        node.value = this.host.get(rawModel);
+                        switch(node.type) {
+                            case 'text':
+                                node.value = this.host.get(rawModel);
 
-                        //from input
-                        (new Y.Node(node)).after(['keyup', 'change'], function(e) {
-                            if (node.value !== this.host.get(rawModel)) {
-                                this.host.set(rawModel, node.value);
-                            }
-                        }, this);
+                                //from input
+                                (new Y.Node(node)).after(['keyup', 'change'], function(e) {
+                                    if (node.value !== this.host.get(rawModel)) {
+                                        this.host.set(rawModel, node.value);
+                                    }
+                                }, this);
 
-                        //from model
-                        this.host.after(rawModel + 'Change', function(e) {
-                            node.value = e.newVal;
-                        });
+                                //from model
+                                this.host.after(rawModel + 'Change', function(e) {
+                                    if (e.newVal !== node.value) {
+                                        node.value = e.newVal;
+                                    }
+                                });
+                                break;
+                            case 'checkbox':
+
+                                if (!node.checked) {
+                                    node.checked = !!this.host.get(rawModel);
+                                }
+                                else {
+                                    this.host.set(rawModel, node.checked && node.value);
+                                }
+
+                                (new Y.Node(node)).after('change', function(e) {
+                                    if (node.checked !== !!this.host.get(rawModel)) {
+                                        this.host.set(rawModel, node.checked && node.value);
+                                    }
+                                }, this);
+
+                                this.afterHostEvent(rawModel + 'Change', function(e) {
+                                    if (!!e.newVal !== node.checked) {
+                                        node.checked = !!e.newVal;
+                                    }
+                                });
+                                break;
+                        }
+
                         break;
                 }
             }
@@ -289,6 +318,58 @@ YUI.add('a2', function (Y, NAME) {
         EXPR : {
             PARSE : /(\w+)\s+in\s(\w+)/
         }
+    });
+
+    function PluginNodeShow(cfg) {
+        this.host = cfg.host;
+        PluginNodeShow.superclass.constructor.apply(this, arguments);
+    }
+
+    Y.extend(PluginNodeShow, Y.Plugin.Base, {
+        initializer : function() {
+            this.onHostEvent('main', function(e) {
+                var node = e.element.node;
+
+                if (node.nodeType === 1 && (node.getAttribute('data-show') || node.getAttribute('data-hide'))) {
+                    this.main(e.element, e);
+                }
+            });
+        },
+        main : function(element, e) {
+            var node = element.node;
+            var mode = -1;
+            var attr = '';
+
+            var show = node.getAttribute('data-show');
+            var hide = node.getAttribute('data-hide');
+
+            if (show) {
+                mode = 1;
+                attr = show;
+            }
+            else if (hide) {
+                mode = 0;
+                attr = hide;
+            }
+
+            if (~mode) {
+                if (!element.data) {
+                    element.data = {};
+                }
+
+                this.process(node, !!mode, !!this.host.get(attr));
+
+                this.afterHostEvent(attr + 'Change', function(e) {
+                    this.process(node, !!mode, !!e.newVal);
+                }, this);
+            }
+        },
+        process : function(node, mode, current) {
+            //todo - display show depends on nodeType
+            node.style.display = mode === current ? 'block' : 'none';
+        }
+    }, {
+        NS: 'PluginNodeShow'
     });
 
     Y.A2 = A2;
