@@ -7,6 +7,10 @@
         .hidden {
             visibility : hidden;
         }
+
+        .yui3-a2simple {
+            visibility : hidden;
+        }
     </style>
 </head>
 <body>
@@ -51,11 +55,22 @@
     &lt;!&ndash;footer&ndash;&gt;
 </div>-->
 
-<div class="yui3-a2simple">
-    {{ value1 }} : static : {{ value2 }}
+<!--<div class="yui3-a2simple">
+    <h1>{{ value1 }}</h1>
+    [{{ value1 }} ::: {{ value1 }}]
     <hr>
     <input type="text" data-model="value1" />
-    <input type="text" data-model="value2" />
+    <input type="text" data-model="value1" />
+</div>-->
+
+<div class="yui3-a2simple">
+    <h1>{{ value1 }}</h1>
+
+    <input type="text" data-model="value1" />
+
+    <ul data-repeat="item in items">
+        <li>{{ &.item }}</li>
+    </ul>
 </div>
 
 <script src="http://yui.yahooapis.com/3.10.3/build/yui/yui-min.js"></script>
@@ -63,16 +78,27 @@
 <script>
     YUI().use('a2', function(Y){
 
-        var a2i = new Y.A2({
+        var A2Custom = Y.Base.create('a2custom', Y.A2, [], {
+            initializer : function() {
+                this.after('value1Change', this.updateItems, this);
+                this.updateItems();
+            },
+            updateItems : function() {
+                this.set('items', Y.Lang.trim(this.get('value1')).split(' '));
+            }
+        }, {
+            ATTRS : {
+                value1 : {
+                    value : 'Hello world'
+                },
+                items  : {
+                    value : []
+                }
+            }
+        });
+
+        var a2i = new A2Custom({
             srcNode : '.yui3-a2simple'
-        });
-
-        Y.one('[data-model=value1]').on('keyup', function(e) {
-            a2i.set('value1', e.currentTarget.get('value'));
-        });
-
-        Y.one('[data-model=value2]').on('keyup', function(e) {
-            a2i.set('value2', e.currentTarget.get('value'));
         });
 
         console.timeEnd('all');

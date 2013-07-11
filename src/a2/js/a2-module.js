@@ -2,6 +2,8 @@ YUI.add('a2', function (Y, NAME) {
 
     var A = Y.Array;
 
+    var O = Y.Object;
+
     var L = Y.Lang;
 
     var A2 = function A2() {
@@ -13,6 +15,7 @@ YUI.add('a2', function (Y, NAME) {
     A2.NAME = 'A2';
 
     Y.extend(A2, Y.Base, {
+        //_allowAdHocAttrs : true,
         initializer : function() {
             this.publish('pre', {
                 emitFacade: true
@@ -24,16 +27,19 @@ YUI.add('a2', function (Y, NAME) {
 
             this.plug(PluginTextModel);
             this.plug(PluginNodeModel);
+            this.plug(PluginNodeRepeat);
 
             var src = this.get('srcNode').getDOMNode();
 
-            console.time('tree');
+            this.onceAfter('initializedChange', function() {
+                console.time('tree');
+                this.processTree(
+                    this.parse(src)
+                );
+                console.timeEnd('tree');
+            });
 
-            this.processTree(
-                this.parse(src)
-            );
-
-            console.timeEnd('tree');
+            src.style.visibility = 'visible';
         },
         parse : function(node, parent) {
             var tree = {};
@@ -76,30 +82,24 @@ YUI.add('a2', function (Y, NAME) {
 
             return element;
         },
-        processTree : function(tree) {
+        processTree : function(tree, data) {
             this.fire('main', {
-                element : tree
+                element : tree,
+                data    : data
             });
             if (tree.children) {
                 A.each(tree.children, function(child) {
-                    this.fire('main', {
-                        element : child
-                    });
+                    this.processTree(child, data);
                 }, this);
             }
         }
     }, {
+        NAME : 'A2',
         ATTRS : {
             srcNode : {
                 setter : function(v) {
                     return L.type(v) ? Y.one(v) : v;
                 }
-            },
-            value1 : {
-                value : 1
-            },
-            value2 : {
-                value : 2
             }
         }
     });
@@ -112,7 +112,6 @@ YUI.add('a2', function (Y, NAME) {
     Y.extend(PluginTextModel, Y.Plugin.Base, {
         initializer : function() {
             this.onHostEvent('main', function(e) {
-                console.log('evt', e);
                 if (e.element.node.nodeType === 3) {
                     this.main(e.element, e);
                 }
@@ -123,111 +122,174 @@ YUI.add('a2', function (Y, NAME) {
 
             var frag = document.createDocumentFragment();
 
-            A.each(text.split(this.expr.split).filter(function(item) {
+            A.each(text.split(PluginTextModel.EXPR.SPLIT).filter(function(item) {
                 return !!item;
             }), function(item) {
                 var node;
 
-                if (this.expr.test.test(item)) {
-                    var name = item.match(this.expr.parse).pop();
+                if (new RegExp(PluginTextModel.EXPR.TEST).test(item)) {//note - should create new regExpr
+                    var parts = item.match(PluginTextModel.EXPR.PARSE);
 
-                    node = document.createTextNode(this.host.get(name));
+                    var name = parts[2];
 
-                    this.afterHostEvent(name + 'Change', function(e) {
-                        node.nodeValue = e.newVal;
-                    });
+                    var text;
+
+                    switch(parts[1]) {
+                        case '&.':
+                            if (e.data && e.data[name]) {
+                                text = e.data[name];
+                                node = document.createTextNode(text);
+                            }
+                            break;
+                        default:
+                            text = this.host.get(name) || '';
+
+                            node = document.createTextNode(text);
+
+                            this.afterHostEvent(name + 'Change', function(e) {
+                                node.nodeValue = e.newVal;
+                            });
+                    }
                 }
                 else {
                     node = document.createTextNode(item);
                 }
-                frag.appendChild(node);
+
+                if (node) {
+                    frag.appendChild(node);
+                }
             }, this);
 
+
             element.node.parentNode.replaceChild(frag, element.node);
-        },
-        expr : {
-            split : /({{\s*\w+\s*}})/g,
-            test  : /^{{\s*\w+\s*}}$/g,
-            parse : /\w+/g
         }
     }, {
-        NS : 'PluginTextModel'
+        NS : 'PluginTextModel',
+        EXPR : {
+            SPLIT : /({{\s*[&.a-zA-Z0-9]+\s*}})/g,
+            TEST  : /^{{\s*[&.a-zA-Z0-9]+\s*}}$/g,
+            PARSE : /(&.)?(\w+)/
+        }
     });
 
-    function PluginNodeModel() {
+    function PluginNodeModel(cfg) {
+        this.host = cfg.host;
         PluginNodeModel.superclass.constructor.apply(this, arguments);
     }
 
     Y.extend(PluginNodeModel, Y.Plugin.Base, {
         initializer : function() {
-//            this.onHostEvent('pre', function(e) {
-//                if (e.element.node.nodeType === 1) {
-//                    this.pre(e.element, e);
-//                }
-//            });
+            this.onHostEvent('main', function(e) {
+                if (e.element.node.nodeType === 1) {
+                    this.main(e.element, e);
+                }
+            });
         },
-        pre : function() {
+        main : function(element, e) {
+            var node = element.node,
+                rawModel = node.getAttribute('data-model');
 
+            if (rawModel) {
+                if (!element.data) {
+                    element.data = {};
+                }
+                element.data.nodeModel = rawModel;
+
+                switch(node.nodeName) {
+                    case 'INPUT':
+                        node.value = this.host.get(rawModel);
+
+                        //from input
+                        (new Y.Node(node)).after(['keyup', 'change'], function(e) {
+                            if (node.value !== this.host.get(rawModel)) {
+                                this.host.set(rawModel, node.value);
+                            }
+                        }, this);
+
+                        //from model
+                        this.host.after(rawModel + 'Change', function(e) {
+                            node.value = e.newVal;
+                        });
+                        break;
+                }
+            }
         }
     }, {
         NS : 'PluginNodeModel'
     });
 
-    /**
-     * Basic text plugin
-     */
-    /*function PluginTextBasic(cfg) {
-        console.log(cfg);
-        PluginTextBasic.superclass.constructor.apply(this, arguments);
+    function PluginNodeRepeat(cfg) {
+        this.host = cfg.host;
+        PluginNodeRepeat.superclass.constructor.apply(this, arguments);
     }
 
-    Y.extend(PluginTextBasic, Y.Plugin.Base, {
-       initializer : function() {
-           this.onHostEvent('pre', function(e) {
-             console.log('PTB', e);
-           });
-       }
-    }, {
-        NS: 'textBasic'
-    });
-
-    *//**
-     * Basic model plugin
-     *//*
-    function PluginNodeBasic(cfg) {
-        PluginNodeBasic.superclass.constructor.apply(this, arguments);
-    }
-
-    Y.extend(PluginNodeBasic, Y.Plugin.Base, {
+    Y.extend(PluginNodeRepeat, Y.Plugin.Base, {
         initializer : function() {
             this.onHostEvent('pre', function(e) {
-                console.log('PNB', e);
+                if (e.element.node.nodeType === 1 && e.element.node.getAttribute('data-repeat')) {
+                    this.pre(e.element, e);
+                    e.halt(true);
+                }
             });
+        },
+        pre : function(element, e) {
+            var rptString = element.node.getAttribute('data-repeat');
+
+            var parts = rptString.match(PluginNodeRepeat.EXPR.PARSE);
+
+            if (parts.length === 3) {
+
+                if (!element.data) {
+                    element.data = {};
+                }
+
+                element.data.NodeRepeat = {
+                    modelName : parts[2],
+                    localName : parts[1],
+                    template  : L.trim(element.node.innerHTML)
+                };
+
+                this.process(element);
+
+                this.afterHostEvent(parts[2] + 'Change', function(e) {
+                    this.process(element);
+                }, this);
+            }
+        },
+        process : function(element) {
+            var data = element.data.NodeRepeat;
+
+            var frag = document.createDocumentFragment();
+
+            var wrapper = document.createElement('div');
+
+            O.each(this.host.get(data.modelName), function(item) {
+                var local = {};
+
+                wrapper.innerHTML = data.template;
+
+                local[data.localName] = item;
+
+                var tree = this.host.parse(wrapper);
+
+                tree.parent = element;
+
+                this.host.processTree(tree, local);
+
+                A.each(wrapper.childNodes, function(child) {
+                    frag.appendChild(child);
+                });
+            }, this);
+
+            element.node.innerHTML = '';
+            element.node.appendChild(frag);
         }
     }, {
-        NS : 'nodeBasic'
-    });*/
-
-    /**
-     * We should go through dom tree (with text nodes)
-     * Invoke all the attached modules
-     * Generate attributes & listeners
-     * Profit
-     */
-
-
-    //scope extension
-
-    //repeat extension
-
-    //model extension
-
-    //process extension
-
-    //& extension
-
-
-
+        NS: 'PluginNodeRepeat',
+        EXPR : {
+            PARSE : /(\w+)\s+in\s(\w+)/
+        }
+    });
 
     Y.A2 = A2;
 
