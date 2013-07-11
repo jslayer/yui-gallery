@@ -20,6 +20,7 @@ YUI.add('a2', function (Y, NAME) {
     //todo - add selected property for <select>
     //todo - add switch..on="modelName" support (when, default)
     //todo - add radio support
+    //todo - add generic form support (formName, errors, patterns for elements)
 
     A2 = function A2() {
         A2.superclass.constructor.apply(this, arguments);

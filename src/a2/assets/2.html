@@ -1,0 +1,34 @@
+<script>
+    var local = {
+        user    : {
+            name       : 'Eugene',
+            getSurname : function(){
+                return this.surname;
+            },
+            setSurname : function(value){
+                this.surname = value;
+            },
+            get        : function(name){
+                return this[name];
+            }
+        },
+        surname : false
+    };
+
+    var globals = {
+        page    : 1,
+        classes : [6, 7, 8]
+    };
+
+    console.log(lex('$user.name', globals, local));
+    console.log(lex('$user.getSurName()', globals, local));
+    console.log(lex('$user.get("surname")', globals, local));
+    console.log(lex("$user.get('surname')", globals, local));
+    console.log(lex('classes', globals, local));
+    console.log(lex('$user.surname = "NoName"', globals, local));
+    console.log(lex('!$user.surname', globals, local));
+
+    function lex(string, globals, local){
+        console.log(string);
+    }
+</script>

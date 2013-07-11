@@ -111,6 +111,51 @@
     </div>
 </div>
 
+
+
+<script type="template/a2" id="simpleTemplate">
+    <div>
+        {{ user.name | lowerCase }}
+        <ul data-repeat="$(id:item) in user.cart | filter: myCustomFilter" data-class-even="even" data-class-odd="odd">
+            <li data-class="$class">
+                <a data-href="{{ $this.showNextPage(1,2,'3') }}">{{ $item.name }}</a>
+                |
+                <small>{{ $item.price | upper }}</small>
+            </li>
+        </ul>
+
+        <div data-model="user.info as $info">
+            <h1>{{ $info.name }}</h1>
+        </div>
+
+        <div ng-model="user.info">
+            <h1>{{ $name }}</h1>
+        </div>
+
+        <div data-show="user.info.ok">
+            User is ok
+        </div>
+
+        <div data-hide="!user.info.ok">
+            User is not ok
+        </div>
+
+        <div data-attrs="style.height:page.height,class:page.classes,id='div[]'">
+            Hello world
+        </div>
+
+        <input type="checkbox" data-model="user.tax" />
+
+        Total: {{ user.cart | sum | tax(user.tax) }}
+
+        <input type="text" data-required="!user.info.ok" />
+
+        <input type="text" data-required="user.info.ok == !error" />
+
+        {{ user.info.name = {name: 'Eugene', surname: user.getSurName()} }}
+    </div>
+</script>
+
 <script src="http://yui.yahooapis.com/3.10.3/build/yui/yui-min.js"></script>
 <script src="../js/a2-module.js"></script>
 <script>
