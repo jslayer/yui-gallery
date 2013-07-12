@@ -20,6 +20,9 @@
         classes : [6, 7, 8]
     };
 
+    console.log(lex('1+1', globals, local));
+    console.log(lex('1+2*3', globals, local));
+
     console.log(lex('$user.name', globals, local));
     console.log(lex('$user.getSurName()', globals, local));
     console.log(lex('$user.get("surname")', globals, local));
