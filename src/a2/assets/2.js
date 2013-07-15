@@ -1,8 +1,11 @@
 #! /usr/bin/node
 
 //lex(' "A" + "B" ');
-//lex('1+1');
-lex('"+A123" + "Test"');
+lex('a = 1+1');
+lex('user.foo.bar = a == c');
+lex('user.foo.bar == "user.foo.bar"');
+//
+//lex('a = [1,2,3]')
 
 function lex(str) {
     var l, i, ch, s, S, ts, c, lsc;
@@ -13,7 +16,8 @@ function lex(str) {
         normal   : 0,
         literal  : 1,
         str      : 2,
-        operator : 3
+        operator : 3,
+        array    : 4
     };
 
     l = str.length;
@@ -24,7 +28,7 @@ function lex(str) {
     while(i < l) {
         ch = str.substr(i,1);
 
-        console.log(i + ' : ' + ch + ' : ' + s);
+        //console.log(i + ' : ' + ch + ' : ' + s);
 
         switch(s) {
             case S.normal:
@@ -41,11 +45,11 @@ function lex(str) {
                 if (~'\'"'.indexOf(ch)) {//string start
                     s = S.str;
                     lsc = ch;
-                    c = '';
+                    c = '"';
                     i++;
                     continue;
                 }
-                if (~'+-*//*~!%&|'.indexOf(ch)) {//+-*//*
+                if (~'+-*//*~!%&|='.indexOf(ch)) {//+-*//*
                     c = ch;
                     s = S.operator;
                     i++;
@@ -53,7 +57,7 @@ function lex(str) {
                 }
                 break;
             case S.literal:
-                if (new RegExp('[0-9a-z$.]').test(ch)) {
+                if (new RegExp('[0-9a-zA-Z$.]').test(ch)) {
                     c += ch;
                     i++;
                     continue;
@@ -71,13 +75,14 @@ function lex(str) {
                     continue;
                 }
                 else {
+                    c += '"';
                     ts.push(c);
                     s = S.normal;
                     i++;
                 }
                 break;
             case S.operator:
-                if ((c === '|' && ch === '|') || (c === '&' && ch === '&')) {
+                if ((c === '|' && ch === '|') || (c === '&' && ch === '&') || (c === '=' && ch === '=')) {
                     c += ch;
                     i++;
                 }
