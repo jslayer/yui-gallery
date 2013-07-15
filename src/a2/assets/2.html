@@ -1,5 +1,5 @@
 <script>
-    var local = {
+    /*var local = {
         user    : {
             name       : 'Eugene',
             getSurname : function(){
@@ -37,5 +37,15 @@
 
     function lex(string, globals, local){
         console.log(string);
+    }*/
+
+    console.log(lex('1+1'));
+
+    function lex(str) {
+        while(str.length > 0) {
+            var ch = str[0];
+            console.log(ch);
+        }
     }
+
 </script>
