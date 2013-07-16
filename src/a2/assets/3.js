@@ -1,4 +1,4 @@
-#! /usr/bin/node
+//#! /usr/bin/node
 
 //lex('a111');
 //lex('a = {a : 2, b : [1,2,3], c : "Hello" + "World"}');
@@ -9,9 +9,35 @@
 //lex('1 + 2*3 ; upper');
 //lex('a = b(c) + " Hello" + "Cruel" = world()');
 //lex('=123');
-lex('!false')
-lex('!0')
+//lex('!false')
+//lex('!0')
 //lex(' ="Hello" ')
+
+//lex('$user.prefix ; translate($user.lang) ; upper')
+
+//lex('1+2+$localMethod(id, true, "hello", a()) + globalValue');
+//lex('1+1*a(user.local, false, {a:b(), c:[1,2,test]})');
+//lex('"Hello " + "Cruel " +  "World"');
+
+//lex('$user.prefix ; translate ; upper')
+
+//lex('1*2*3*4*5*6')
+
+console.time('b');
+//for(i = 0; i < 1000; i++) {
+    //lex('a = 1+2+3+4*5/6')
+//}
+//lex('-1+2*3+"Hello"');
+//lex('user.name = "[" + user.getFirstName() + " " + user.getLastName() + "]"');
+lex('user.name = "[" + user.firstName + " " + user.lastName + "]"');
+
+console.timeEnd('b');
+
+console.time('a');
+for(i = 0; i < 1000000; i++) {
+    var out = '[' + 'Eugene' + ' ' + 'Poltorakov' + ']';
+}
+console.timeEnd('a');
 
 function lex(input){
     var i = 0;
@@ -31,7 +57,7 @@ function lex(input){
         LONG_OPERATOR : 'T_LONG_OPERATOR'
     };
 
-    input += ';';
+    input += '\u0000';
 
     var l = input.length;
 
@@ -63,23 +89,23 @@ function lex(input){
                 continue;
             }
 
-            if (~'=&|+-'.indexOf(ch) && tokens.length > 0) {//операции, которые могут быть двойными, либо тройными ===, ==, &&
+            if (~'=&|+'.indexOf(ch) && tokens.length > 0) {//операции, которые могут быть двойными, либо тройными ===, ==, &&
                 stack.push(TYPES.LONG_OPERATOR);
                 stack.push(ch);
                 continue;
             }
 
-            if (~'()!'.indexOf(ch)) {//одиночные токены которые могут быть в начале
+            if (~'()!-'.indexOf(ch)) {//одиночные токены которые могут быть в начале
                 tokens.push(ch);
                 continue;
             }
 
-            if (~'{}[]:,%^*'.indexOf(ch) && tokens.length > 0) {//одиночные токены которые НЕ могут быть в начале
+            if (~'{}[]:,%^*/;'.indexOf(ch) && tokens.length > 0) {//одиночные токены которые НЕ могут быть в начале
                 tokens.push(ch);
                 continue;
             }
 
-            if (ch === ';') {
+            if (ch === '\u0000') {
                 break;
             }
 
@@ -128,6 +154,9 @@ function lex(input){
                         case 'true':
                             _current = true;
                             break;
+                        case 'null':
+                            _current = null;
+                            break;
                     }
 
                     tokens.push(_current);
@@ -140,7 +169,7 @@ function lex(input){
             if (stack[0] === TYPES.LONG_OPERATOR) {
                 if (ch === stack[1]) {
                     stack.push(ch);
-                    console.log(stack.length);
+                    //console.log(stack.length);
                 }
                 else {
                     stack.shift();
@@ -160,8 +189,176 @@ function lex(input){
     }
 
     if (stack.length > 0) {
-        throw new Error('Stack is not empty: ' + stack);
+        throw new Error('Stack is not empty: [ ' + stack.join(',') + ' ]');
     }
 
-    console.log(tokens);
+    //тут у нас уже есть пачка токенов, которую теперь нужно привести в чувства :)
+    //console.log(tokens);
+
+    TYPES = {
+        END           : 'T_END',
+        VALUE         : 'T_VALUE',//string, null, boolean, number
+        OPERATOR      : 'T_OPERATOR',
+        IDENTIFIER    : 'T_IDENTIFIER',
+        //FUNCTION      : 'T_FUNCTION',
+        BRACKET_OPEN  : 'T_BRACKET_OPEN',
+        BRACKET_CLOSE : 'T_BRACKET_CLOSE',
+        ENUM          : 'T_ENUM',
+        ARRAY_START   : 'T_ARRAY_START',
+        ARRAY_END     : 'T_ARRAY_END',
+        OBJECT_START  : 'T_OBJECT_START',
+        OBJECT_END    : 'T_OBJECT_END',
+        OBJECT_KEY    : 'T_OBJECT_KEY',
+        ASSIGNMENT    : 'T_ASSIGNMENT'
+    };
+
+    var body = 'return ';
+
+    i = 0;
+    l = tokens.length;
+
+    var token;
+
+    //stack = [];
+
+    while(tokens.length) {
+        token = tokens.shift();
+        //console.log(token);
+        //console.log(token, ' :: ' ,tokenType(token, tokens), ' :: ', nextTokenType(tokens));
+        var type = tokenType(token, tokens);
+        var next = nextTokenType(tokens);
+
+        if (type === TYPES.IDENTIFIER) {
+            if (next === TYPES.BRACKET_OPEN) {//function call
+                body += ['this._getMethod("', token, '")'].join('');
+                continue;
+            }
+            else if (next === TYPES.ASSIGNMENT) {//some magic :)
+                body += 'this._setValue("' + token + '",';
+                for(i=0, l=tokens.length; i < l; i++) {
+                    if (tokens[i] === ';') {
+                        break;
+                    }
+                }
+                tokens.splice(i, 0, ')');
+                continue;
+            }
+            else if (next !== TYPES.OBJECT_KEY) {
+                body += ['this._getValue("', token, '")'].join('');
+                continue;
+            }
+            else {
+                body += token;
+                continue;
+            }
+        }
+
+        switch(type) {
+            case TYPES.VALUE:
+            case TYPES.OPERATOR:
+            case TYPES.BRACKET_OPEN:
+            case TYPES.BRACKET_CLOSE:
+            case TYPES.ENUM:
+            case TYPES.ARRAY_START:
+            case TYPES.ARRAY_END:
+            case TYPES.OBJECT_START:
+            case TYPES.OBJECT_END:
+            case TYPES.OBJECT_KEY:
+                body += token;
+                continue;
+        }
+
+        if (type === TYPES.ASSIGNMENT) {
+            continue;
+        }
+
+        throw new Error('Unknown token type : ' + token + ' (' + type + ') in ' + tokens);
+
+    }
+
+    function tokenType(token, tokens) {
+        if (typeof token === 'undefined') {
+            return TYPES.END;
+        }
+        if (token === null || ~['boolean', 'number'].indexOf(typeof(token)) || token.substr(0, 1) === '"') {
+            return TYPES.VALUE;
+        }
+        if (token === '=') {
+            return TYPES.ASSIGNMENT;
+        }
+        if (~'!+-*/&|^=%'.indexOf(token.substr(0, 1))) {
+            return TYPES.OPERATOR;
+        }
+        if (new RegExp(/[$\w]/).test(token.substr(0, 1))) {
+            return TYPES.IDENTIFIER;
+        }
+
+        switch(token) {
+            case '(':
+                return TYPES.BRACKET_OPEN;
+            case ')':
+                return TYPES.BRACKET_CLOSE;
+            case ',':
+                return TYPES.ENUM;
+            case '[':
+                return TYPES.ARRAY_START;
+            case ']':
+                return TYPES.ARRAY_END;
+            case '{':
+                return TYPES.OBJECT_START;
+            case '}':
+                return TYPES.OBJECT_END;
+            case ':':
+                return TYPES.OBJECT_KEY;
+        }
+        throw new Error('Unknown token type : ' + token + ' in ' + tokens);
+    }
+
+    function nextTokenType(tokens) {
+       return tokenType(tokens[0], tokens);
+    }
+
+    var func = new Function(body);
+
+    //console.log(body);
+    var mock = {
+        _setValue : function(name, value) {
+            //console.log(name, value);
+            return value;
+        },
+        _getValue : function(name) {
+            switch(name) {
+                case 'user.firstName':
+                    return 'Eugene';
+                case 'user.lastName':
+                    return 'Poltorakov';
+            }
+            throw new Error('Unknown method ' + name);
+        },
+        _getMethod : function(name) {
+            switch(name) {
+                case 'user.getFirstName':
+                    return function() {
+                        return 'Eugene';
+                    };
+                case 'user.getLastName':
+                    return function() {
+                        return 'Poltorakov';
+                    };
+            }
+            throw new Error('Unknown method ' + name);
+        }
+    };
+
+    var out;
+
+    console.time('c');
+
+    for(i = 0; i < 1000000; i++) {
+        out = func.call(mock);
+    }
+
+    console.timeEnd('c');
+
+    //console.log('OUTPUT: ', out);
 }
