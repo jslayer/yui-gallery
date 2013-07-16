@@ -245,11 +245,11 @@ function lex(input){
 
         if (type === TYPES.IDENTIFIER) {
             if (next === TYPES.BRACKET_OPEN) {//function call
-                body += ['this._getMethod("', token, '")'].join('');
+                body += ['this._getMethod.call(this,("', token, '")'].join('');
                 continue;
             }
             else if (next === TYPES.ASSIGNMENT) {//some magic :)
-                body += 'this._setValue("' + token + '",';
+                body += 'this._setValue.call(this,"' + token + '",';
                 for(i=0, l=tokens.length; i < l; i++) {
                     if (tokens[i] === ';') {
                         break;
@@ -259,7 +259,7 @@ function lex(input){
                 continue;
             }
             else if (next !== TYPES.OBJECT_KEY) {
-                body += ['this._getValue("', token, '")'].join('');
+                body += ['this._getValue.call(this,("', token, '")'].join('');
                 continue;
             }
             else {
@@ -346,7 +346,7 @@ function lex(input){
     var service;
 
     while(service = services.shift()) {
-        body = ['this._applyService("', service, '",', body, ')'].join('');
+        body = ['this._applyService.call(this,("', service, '",', body, ')'].join('');
     }
 
     //add return
