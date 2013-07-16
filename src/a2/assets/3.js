@@ -29,15 +29,17 @@ console.time('b');
 //}
 //lex('-1+2*3+"Hello"');
 //lex('user.name = "[" + user.getFirstName() + " " + user.getLastName() + "]"');
-lex('user.name = "[" + user.firstName + " " + user.lastName + "]"');
+//lex('user.name = "[" + user.firstName + " " + user.lastName + "]"');
+
+lex('a = "Hello"; translate; upper')
 
 console.timeEnd('b');
 
-console.time('a');
-for(i = 0; i < 1000000; i++) {
-    var out = '[' + 'Eugene' + ' ' + 'Poltorakov' + ']';
-}
-console.timeEnd('a');
+//console.time('a');
+//for(i = 0; i < 1000000; i++) {
+//    var out = '[' + 'Eugene' + ' ' + 'Poltorakov' + ']';
+//}
+//console.timeEnd('a');
 
 function lex(input){
     var i = 0;
@@ -212,7 +214,7 @@ function lex(input){
         ASSIGNMENT    : 'T_ASSIGNMENT'
     };
 
-    var body = 'return ';
+    var body = '';
 
     i = 0;
     l = tokens.length;
@@ -221,12 +223,25 @@ function lex(input){
 
     //stack = [];
 
+    var services = [];
+    var endOfMainExpression = false;
+
+    console.log(tokens);
+
     while(tokens.length) {
         token = tokens.shift();
+
         //console.log(token);
         //console.log(token, ' :: ' ,tokenType(token, tokens), ' :: ', nextTokenType(tokens));
         var type = tokenType(token, tokens);
         var next = nextTokenType(tokens);
+
+        if (endOfMainExpression) {
+            if (type === TYPES.IDENTIFIER) {
+                services.push(token);
+            }
+            continue;
+        }
 
         if (type === TYPES.IDENTIFIER) {
             if (next === TYPES.BRACKET_OPEN) {//function call
@@ -272,6 +287,11 @@ function lex(input){
             continue;
         }
 
+        if (type == TYPES.END) {
+            endOfMainExpression = true;
+            continue;
+        }
+
         throw new Error('Unknown token type : ' + token + ' (' + type + ') in ' + tokens);
 
     }
@@ -310,6 +330,8 @@ function lex(input){
                 return TYPES.OBJECT_END;
             case ':':
                 return TYPES.OBJECT_KEY;
+            case ';':
+                return TYPES.END;
         }
         throw new Error('Unknown token type : ' + token + ' in ' + tokens);
     }
@@ -317,6 +339,20 @@ function lex(input){
     function nextTokenType(tokens) {
        return tokenType(tokens[0], tokens);
     }
+
+    console.log(body);
+
+    //apply services
+    var service;
+
+    while(service = services.shift()) {
+        body = ['this._applyService("', service, '",', body, ')'].join('');
+    }
+
+    //add return
+    body = 'return ' + body;
+
+    console.log(body);
 
     var func = new Function(body);
 
@@ -355,7 +391,7 @@ function lex(input){
     console.time('c');
 
     for(i = 0; i < 1000000; i++) {
-        out = func.call(mock);
+        //out = func.call(mock);
     }
 
     console.timeEnd('c');
