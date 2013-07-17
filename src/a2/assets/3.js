@@ -29,9 +29,9 @@ console.time('b');
 //}
 //lex('-1+2*3+"Hello"');
 //lex('user.name = "[" + user.getFirstName() + " " + user.getLastName() + "]"');
-//lex('user.name = "[" + user.firstName + " " + user.lastName + "]"');
+lex('user.name = "[" + user.firstName + " " + user.lastName + "]"');
 
-lex('a = "Hello"; translate; upper')
+//lex('a = "Hello"; translate; upper')
 
 console.timeEnd('b');
 
@@ -390,11 +390,13 @@ function lex(input){
 
     console.time('c');
 
-    for(i = 0; i < 1000000; i++) {
-        //out = func.call(mock);
-    }
+//    for(i = 0; i < 1000000; i++) {
+//        out = func.call(mock);
+//    }
+
+    out = func.call(mock);
 
     console.timeEnd('c');
 
-    //console.log('OUTPUT: ', out);
+    console.log('OUTPUT: ', out);
 }
