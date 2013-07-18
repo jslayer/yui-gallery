@@ -31,6 +31,8 @@ console.time('b');
 //lex('user.name = "[" + user.getFirstName() + " " + user.getLastName() + "]"');
 lex('user.name = "[" + user.firstName + " " + user.lastName + "]"');
 
+lex('user.name ; ucFirst ; upper ; have("Test")');
+
 //lex('a = "Hello"; translate; upper')
 
 console.timeEnd('b');
