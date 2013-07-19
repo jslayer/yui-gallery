@@ -33,6 +33,8 @@ lex('user.name = "[" + user.firstName + " " + user.lastName + "]"');
 
 lex('user.name ; ucFirst ; upper ; have("Test")');
 
+lex('user.firstName + user.lastName; ucFirst ; upper ; have("Test")');
+
 //lex('a = "Hello"; translate; upper')
 
 console.timeEnd('b');
