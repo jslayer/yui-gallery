@@ -35,6 +35,8 @@ lex('user.name ; ucFirst ; upper ; have("Test")');
 
 lex('user.firstName + user.lastName; ucFirst ; upper ; have("Test")');
 
+
+//todo - rewrite all code to optimize performance
 //lex('a = "Hello"; translate; upper')
 
 console.timeEnd('b');
